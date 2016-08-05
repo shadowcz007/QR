@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>QRstyle</title>
+<meta http-equiv="Content-Type">
+      <meta content="text/html; charset=utf-8"> 
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+      <meta name="format-detection" content="telephone=no">
+      <meta name="format-detection" content="email=no">
+      <meta name="msapplication-tap-highlight" content="no" />
+      <script src="js/lib/jquery-3.1.0.min.js"></script>
+      <!--微信JS-SDK-->
+		<script src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+		<script type="text/javascript" src="js/lib/jquery.qrcode.min.js"></script>
+      <script src="js/lib/easeljs-NEXT.min.js"></script>
+
+		
+		<!--输入框自适应-->
+		<script type="text/javascript" src="http://www.fandesj.com/yifind/Public/js/autoTextarea.js"></script>
+		
+
+     <link rel="stylesheet" href="http://www.fandesj.com/yifind/Public/css/weui.css">
+	<style>
+	.pannel{
+		width: 90%;
+		margin-left: 5%;
+		text-align: center;
+		margin-top: 8px;
+	}
+#myQR{
+	border: 1px solid gray;
+}
+#QRorigin{
+	display: none;
+}
+	</style>
+
+
+</head>
+<body onload="init();">
+
+<div class="pannel" id="container">
+
+	<div class="cell">
+			<div class="hd">
+				<br>
+			    <h2 class="page_title">得到 <br><small style="color:#B3B3B3">今日感悟 | 知行合一</small></h2>
+			</div>
+			<a href="javascript:void(0);" class="weui_media_box weui_media_appmsg">
+		                <div class="weui_media_hd">
+		                    <img id="userPic" class="weui_media_appmsg_thumb" src="img/1.jpg" ><canvas style="display:none" id="userPicCanvas"></canvas>
+		                </div>
+		                <div class="weui_media_bd" style="text-align: left;">
+		                    <h4 class="weui_media_title">hi~shadow</h4>
+		                    <p class="weui_media_desc">记录下今日所得吧！</p>
+		                </div>
+	        </a>
+	        
+			<div class="weui_cells weui_cells_form">
+			        <div class="weui_cell">
+
+
+			            <div class="weui_cell_bd weui_cell_primary">
+			                <textarea class="weui_textarea" placeholder="输入我的感悟" rows="3" style="background-color:rgb(237, 237, 237);color:rgb(29, 29, 29);"></textarea>
+			                
+			            </div>
+			        </div>
+		    </div>
+			<ul class="weui_media_info weui_media_box weui_media_text" style="list-style: none;color:gray">
+                   
+                    <li class="weui_media_info_meta " id='useDate'></li>
+                    
+            </ul>
+	</div>
+<a href="javascript:tranQR();" class="weui_btn weui_btn_plain_primary">生成</a>
+	</div>
+	<div class="pannel">
+		<img src="" alt="" id="myQRImage">
+
+
+
+	</div>
+	<canvas id="myQR" style="display:none"></canvas>
+	<div id="qrcodeCanvas" style="display:none"></div>
+<script>
+var _boundx=$(window).width();
+	var _boundy=$(window).height();
+var stage;
+function init() {	
+
+	$('#myQR').attr({'width':280,'height':480});
+
+
+	var myQR=$('#myQR').get(0);
+	stage = new createjs.Stage("myQR");
+	
+	var  image = new Image();
+    image.src = "img/wineGlasses.png";
+    image.onload = handleImageLoad;
+
+   };
+
+   function handleImageLoad(){
+   	   	var bggraphics = new createjs.Graphics().f("white").ss(1,"round").s("gray").dr(0, 0, 280, 480);
+   		var bg=new createjs.Shape(bggraphics);
+   			stage.addChild(bg);
+
+		var QRtemplete =new createjs.Bitmap(event.target);
+		
+
+	var QRscaleX=240/QRtemplete.getBounds().width;
+	var QRscaleY=240/QRtemplete.getBounds().height;
+		QRtemplete.scaleX=QRscaleX;
+		QRtemplete.scaleY=QRscaleY;
+
+		QRtemplete.x=30;
+		QRtemplete.y=420-QRscaleY*QRtemplete.getBounds().height;
+		stage.addChild(QRtemplete);
+
+
+
+	var userPic=new createjs.Bitmap(getBase64Image());
+		
+		userPic.scaleX=44/userPic.getBounds().width;
+		userPic.scaleY=44/userPic.getBounds().width;
+		userPic.x=12;
+		userPic.y=24;
+		stage.addChild(userPic);
+
+	var userinfo = new createjs.Text('shadow的所得', "38px Georgia", "black");
+		 userinfo.x = 12;
+		 userinfo.y=72;
+		 userinfo.scaleX=0.5;
+		 userinfo.scaleY=0.5;
+		 
+
+		 stage.addChild(userinfo);
+
+	var userdate = new createjs.Text(useDate(), "12px Georgia", "gray");
+		 userdate.x =12;
+		 userdate.y=98;
+		 
+
+		 stage.addChild(userdate);
+	var tipsText = new createjs.Text("长按图片，识别二维码查阅", "12px Georgia", "black");
+		 tipsText.x = 12;
+		 tipsText.y=440;
+		 
+
+		 stage.addChild(tipsText);
+
+		stage.update();
+
+	};
+
+
+
+function tranQR(){
+	var content= $('textarea').val();
+
+	console.log(content);
+	if (content=='') {
+
+		content= $('textarea').val()+'平凡所得,知行合一'+'                          >>>>>>凡得提供技术服务,微信服务号fandeshijian';
+
+
+	}else{
+		content= $('textarea').val()+'                              >>>>>>凡得提供技术服务,微信服务号fandeshijian';
+
+
+	};
+
+	
+
+		//jQuery('#qrcode').qrcode("this plugin is great");
+
+		$('#qrcodeCanvas').qrcode({
+			width:200,
+			height:200,
+			correctLevel:0,
+			text:utf16to8(content)
+		});
+
+		var canvas=$('#qrcodeCanvas canvas').last().get(0);
+		
+		var data = canvas.toDataURL();
+		if ($('#QRorigin')) {
+
+			$('#QRorigin').remove();
+			$('body').append('<img id=QRorigin src='+data+'>');
+
+		};
+		
+
+		var myQRBitmap = new createjs.Bitmap(data);
+		myQRBitmap.scaleX=0.45;
+		myQRBitmap.scaleY=0.5;
+		myQRBitmap.x=160;
+		myQRBitmap.y=180;
+		myQRBitmap.rotation=32;
+
+		var matrix = new createjs.ColorMatrix().adjustHue(180).adjustSaturation(100);
+
+
+		myQRBitmap.filters = [
+     new createjs.ColorFilter(139, 40, 60, 1, 139, 40, 60),
+     new createjs.BlurFilter(0, 0, 0),
+      //new createjs.ColorMatrixFilter(matrix)
+ ];
+
+ myQRBitmap.cache(0,0, 200, 200);
+		stage.addChild(myQRBitmap);
+		stage.update();
+var myQRImage=$('#myQR').get(0).toDataURL("image/png");
+
+$('#myQRImage').attr('src',myQRImage);
+
+};
+function utf16to8(str) {  
+    var out, i, len, c;  
+    out = "";  
+    len = str.length;  
+    for(i = 0; i < len; i++) {  
+    c = str.charCodeAt(i);  
+    if ((c >= 0x0001) && (c <= 0x007F)) {  
+        out += str.charAt(i);  
+    } else if (c > 0x07FF) {  
+        out += String.fromCharCode(0xE0 | ((c >> 12) & 0x0F));  
+        out += String.fromCharCode(0x80 | ((c >>  6) & 0x3F));  
+        out += String.fromCharCode(0x80 | ((c >>  0) & 0x3F));  
+    } else {  
+        out += String.fromCharCode(0xC0 | ((c >>  6) & 0x1F));  
+        out += String.fromCharCode(0x80 | ((c >>  0) & 0x3F));  
+    }  
+    }  
+    return out;  
+};
+
+
+
+function getBase64Image() {
+      var canvas1 = $('#userPicCanvas').get(0);
+      var img=$('#userPic').get(0);
+      $('#userPicCanvas').attr({'width':img.width,'height':img.height});  
+
+      var ctx1 = canvas1.getContext("2d");
+      ctx1.drawImage(img, 0, 0, img.width, img.height);     
+      return canvas1.toDataURL();
+      // return dataURL.replace("data:image/png;base64,", "");
+    }
+
+
+
+
+
+
+
+function useDate(){
+	var myDate = new Date();
+	
+	var month=myDate.getMonth()+1;
+	var userDate='此时'+myDate.getFullYear()+'/'+month+'/'+myDate.getDate()+',此刻'+myDate.getHours()+':'+myDate.getMinutes();
+	
+
+	return 	userDate;
+		/*
+		myDate.getFullYear();    //获取完整的年份(4位,1970-????)
+		myDate.getMonth();       //获取当前月份(0-11,0代表1月)
+		myDate.getDate();        //获取当前日(1-31)
+		myDate.getDay();         //获取当前星期X(0-6,0代表星期天)
+		
+		myDate.getHours();       //获取当前小时数(0-23)
+		myDate.getMinutes();     //获取当前分钟数(0-59)	
+		*/
+		
+};
+
+
+
+
+
+
+
+$('#useDate').text(useDate());
+
+/*
+
+	var ca=$('#qrcodeCanvas canvas').get(0);
+var ctx = ca.getContext('2d');
+ctx.arc(100,100,50,0,Math.PI*2);
+ctx.fillStyle = "rgba(234,1,1,0.6)";
+ctx.fill();
+ctx.beginPath();
+ctx.fillStyle = 'rgba(1,234,1,0.7)';
+ctx.fillRect(100,100,70,100);
+ca.onclick = function  (e) {
+	var x = e.clientX,
+		y = e.clientY,
+		caL = ca.getBoundingClientRect().left,
+		caT = ca.getBoundingClientRect().top;
+	var X = x-caL, Y = y-caT;
+	// console.log('X:'+X+',Y:'+Y);
+	var imagedata = ctx.getImageData(X,Y,10,10);
+	for(var i=0,dl = imagedata.data.length;i
+<dl;i+=4) {
+		imagedata.data[i] = 255-imagedata.data[i];
+		imagedata.data[i+1] = 255-imagedata.data[i];
+		imagedata.data[i+2] = 255-imagedata.data[i];
+	}
+	ctx.putImageData(imagedata,X,Y);
+	// jg.innerHTML = data.data;
+	console.log(imagedata);
+}
+	*/
+var autotext=$('.weui_textarea').get(0);
+ autoTextarea(autotext);
+	
+</script>
+
+</body>
+</html>
